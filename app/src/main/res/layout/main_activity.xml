@@ -35,9 +35,9 @@
                     android:id="@+id/tv_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/find_around"
+                    android:text="@string/pick_place"
                     android:textColor="@color/white"
-                    android:textSize="20dp"
+                    android:textSize="15sp"
                     android:visibility="gone"
                     android:layout_centerInParent="true"
                     />
@@ -47,6 +47,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="60dp"
                     android:layout_marginRight="50dp"
+                    android:visibility="gone"
                     android:background="@drawable/custom_edittext"
                     android:orientation="horizontal">
 
@@ -73,7 +74,6 @@
                         android:layout_marginStart="8dp"
                         android:background="@color/white"
                         android:ems="10"
-                        android:hint="Search here"
                         android:inputType="textAutoComplete"
                         android:padding="5dp"
                         android:focusableInTouchMode="true"
@@ -100,17 +100,78 @@
                     android:id="@+id/imgFilter"
                     android:layout_width="38dp"
                     android:layout_height="38dp"
+
                     android:layout_alignParentBottom="true"
                     android:layout_alignParentEnd="true"
-                    app:srcCompat="@drawable/icon_filter" />
+                    app:srcCompat="@drawable/ic_sort" />
             </RelativeLayout>
         </android.support.v7.widget.Toolbar>
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/rvSearch"
+        <RelativeLayout
+            android:id="@+id/rlFilterCity"
+            android:layout_width="180dp"
+            android:layout_height="wrap_content"
             android:visibility="gone"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_marginBottom="2dp"
+            android:layout_gravity="right"
+            android:background="@color/white">
+
+            <ImageView
+                android:id="@+id/imgFilterCity"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginBottom="8dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:src="@drawable/ic_ward"
+               />
+
+            <TextView
+                android:id="@+id/tvFilterCity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_gravity="center"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Button"
+                android:text="Thành Phố"
+                android:textColor="@color/colorPrimary"
+                android:textSize="16sp" />
+
+        </RelativeLayout>
+        <RelativeLayout
+            android:id="@+id/rlSort"
+            android:layout_width="180dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp"
+            android:layout_gravity="right"
+            android:visibility="gone"
+            android:background="@color/white">
+
+            <ImageView
+                android:id="@+id/imgSort"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginBottom="8dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:src="@drawable/ic_swap_vert"
+                />
+
+            <TextView
+                android:id="@+id/tvSort"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_centerInParent="true"
+                android:text="Sắp xếp"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Button"
+                android:textColor="@color/colorPrimary"
+                android:textSize="16sp" />
+
+
+        </RelativeLayout>
 
     </android.support.design.widget.AppBarLayout>
 

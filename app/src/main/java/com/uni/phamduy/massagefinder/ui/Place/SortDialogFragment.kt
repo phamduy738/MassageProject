@@ -8,7 +8,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.uni.phamduy.massagefinder.R
+import com.uni.phamduy.massagefinder.adapter.SortAdapter
 import com.uni.phamduy.massagefinder.adapter.WardAdapter
+import com.uni.phamduy.massagefinder.ui.Map.MapFragment
 import java.util.*
 
 /**
@@ -16,26 +18,43 @@ import java.util.*
  */
 class SortDialogFragment : DialogFragment() {
     private var rvDialog: RecyclerView? = null
-    private var adapter: WardAdapter? = null
+    private var adapter: SortAdapter? = null
 //    var customList:List<Arrays>? = null
 
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v = inflater?.inflate(R.layout.fragment_ward_dialog, container, false)
-         var customList = Arrays.asList(activity.resources.getStringArray(R.array.ward))
         val sort_array = activity.resources.getStringArray(R.array.sort)
         val arraySort :List<String> = sort_array.toList()
         rvDialog = v?.findViewById(R.id.rvDialog)
         val linearLayoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
         rvDialog!!.layoutManager = linearLayoutManager
-        //setadapter
-         adapter = WardAdapter(context, arraySort)
-        rvDialog!!.adapter = adapter
-        adapter!!.setOnItemClickListener(object : WardAdapter.ClickListener {
-            override fun onItemClick(position: Int, v: View) {
-//                dialog.dismiss()
-            }
 
+         adapter = SortAdapter(context, arraySort, PlaceFragment.instance.posSort!!)
+        rvDialog!!.adapter = adapter
+        adapter!!.setOnItemClickListener(object : SortAdapter.ClickListener {
+            override fun onItemClick(position: Int, v: View) {
+                when (position) {
+                    0 -> {
+
+                        MapFragment.Sort.mSort = "distance"
+                        dialog.dismiss()
+                        PlaceFragment.instance.chooseSoort(0)
+
+                    }
+                    1 -> {
+                        MapFragment.Sort.mSort = "rating"
+                        dialog.dismiss()
+                        PlaceFragment.instance.chooseSoort(1)
+
+                    }
+                    2 -> {
+                        MapFragment.Sort.mSort = "alphabet"
+                        dialog.dismiss()
+                        PlaceFragment.instance.chooseSoort(2)
+                    }
+                }
+            }
 
         })
         return v

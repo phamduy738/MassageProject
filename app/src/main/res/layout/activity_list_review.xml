@@ -13,26 +13,23 @@
 
 
             <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbar1"
+                android:id="@+id/toolbarReview"
                 android:layout_width="match_parent"
                 android:layout_height="?android:attr/actionBarSize"
                 android:background="@color/colorPrimary"
                 app:layout_collapseMode="pin"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
                 app:layout_scrollFlags="scroll|enterAlways"
-                app:title="Chi Tiết Bình Luận"
-                app:titleMarginStart="5dp"
-                app:titleTextColor="@color/white">
+                >
                 <TextView
-                    android:id="@+id/tvClose"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_gravity="right"
-                    android:layout_marginRight="20dp"
-                    android:text="@string/gotobase"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Title"
-                    android:textColor="@color/white" />
+                    android:text="Chi Tiết Bình Luận"
+                    android:textColor="@color/white"
+                    android:layout_gravity="center"
+                    android:id="@+id/toolbar_title" />
+
+
             </android.support.v7.widget.Toolbar>
 
 

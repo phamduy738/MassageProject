@@ -4,27 +4,34 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import kotlinx.android.synthetic.main.flash_activity.*
 
-class FlashActivityActivity : AppCompatActivity(), View.OnClickListener {
+class SplashActivity : AppCompatActivity() {
     var ACESSLOCATION = 123
-    override fun onClick(p0: View?) {
+   /* override fun onClick(p0: View?) {
         if (p0 != null) {
             when (p0.id) {
                 R.id.btnFind -> {
-                    this.startActivity(Intent(this@FlashActivityActivity, MainActivity::class.java))
+                    this.startActivity(Intent(this@SplashActivity, MainActivity::class.java))
                 }
             }
+        }
+    }*/
+    private var handler = Handler()
+    private var runnable: Runnable = object : Runnable {
+        override fun run() {
+            startActivity(Intent(this@SplashActivity, MainActivity::class.java))
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.flash_activity)
-        btnFind.setOnClickListener(this)
+        handler.postDelayed(runnable, 2000)
         checkPermission()
     }
 

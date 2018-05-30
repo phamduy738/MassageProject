@@ -29,7 +29,7 @@ class ListWardAdapter(internal var context: Context, internal var list: List<Dis
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val myHolder = holder as MyHolder
         myHolder.tvStoreName.text = list[position].districtName
-        Glide.with(context).load(list[position].image.link).into(myHolder. thumbnail)
+        Glide.with(context).load(list[position].image?.link).into(myHolder. thumbnail)
 
     }
 
@@ -39,19 +39,29 @@ class ListWardAdapter(internal var context: Context, internal var list: List<Dis
         return list.size
     }
 
-    inner class MyHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-          var tvStoreName: TextView
+    inner class MyHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
+        override fun onClick(p0: View?) {
+          clickListener?.OnItemClick(adapterPosition, p0!!)
+        }
+
+        var tvStoreName: TextView
          var cardView: CardView
         var thumbnail: ImageView
-        private var moveScreen: MoveScreen? = null
+
         init {
             thumbnail= itemView.findViewById(R.id.thumbnail)
             tvStoreName = itemView.findViewById<TextView>(R.id.tvStoreName)
             cardView = itemView.findViewById(R.id.cardView)
-            itemView.setOnClickListener {
-                moveScreen = MoveScreen(context)
-                moveScreen!!.clickedOn(R.id.content, PlaceFragment())
-            }
+            itemView.setOnClickListener (this)
         }
+    }
+    fun setOnItemClickListener(clickListener: ListWardAdapter.ClickListener) {
+        ListWardAdapter.clickListener = clickListener
+    }
+    interface ClickListener{
+        fun OnItemClick(position : Int, v: View)
+    }
+    companion object {
+        private var clickListener:ClickListener? = null
     }
 }

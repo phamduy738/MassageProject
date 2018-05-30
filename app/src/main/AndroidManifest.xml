@@ -20,7 +20,7 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity android:name=".FlashActivityActivity">
+        <activity android:name=".SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -30,8 +30,8 @@
         <activity android:name=".MainActivity">
 
         </activity>
-        <activity android:name=".ui.PlaceDetailActivity"/>
-        <activity android:name=".ui.ListReviewActivity"/>
+        <activity android:name=".ui.Place.PlaceDetailActivity"/>
+        <activity android:name=".ui.Staff.ListReviewActivity"/>
     </application>
 
 </manifest>

@@ -2,6 +2,7 @@ package com.uni.phamduy.massagefinder.ui.Map
 
 import android.Manifest
 import android.app.Activity
+import android.app.ProgressDialog
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -13,10 +14,13 @@ import android.location.Location
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,28 +32,94 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.*
+import com.uni.phamduy.coinmarket.networking.ApiUtils
+import com.uni.phamduy.coinmarket.networking.SOService
 import com.uni.phamduy.massagefinder.MainActivity
 import com.uni.phamduy.massagefinder.R
+import com.uni.phamduy.massagefinder.module.district.District
+import com.uni.phamduy.massagefinder.module.place.Place
+import com.uni.phamduy.massagefinder.utils.Common
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.io.IOException
 import java.util.*
+import kotlin.concurrent.thread
 
 
 /**
  * Created by PhamDuy on 9/12/2017.
  */
-class MapFragment : Fragment(), OnMapReadyCallback,GoogleApiClient.ConnectionCallbacks,GoogleApiClient.OnConnectionFailedListener, LocationListener {
+class MapFragment : Fragment(), OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
-     var mGoogleApiClient: GoogleApiClient? = null
-      var mLastLocation: Location? = null
-     var mCurrLocationMarker: Marker? = null
-     lateinit var mLocationRequest: LocationRequest
+    var mGoogleApiClient: GoogleApiClient? = null
+    var mLastLocation: Location? = null
+    var mCurrLocationMarker: Marker? = null
+    lateinit var mLocationRequest: LocationRequest
     private var mMap: GoogleMap? = null
-    var mapFragment:SupportMapFragment? = null
+    var mapFragment: SupportMapFragment? = null
+    private var service: SOService? = null
+    private var isCurrentLocation: Boolean? = false
+    var listMarker: MutableList<MarkerOptions> = ArrayList()
+//    var loadingDialog: ProgressDialog? = null
+
     private val REQUEST_CHECK_SETTINGS_GPS = 0x1
+    private var city: String? = null
+    private var district: String? = null
+    private var tags: String? = null
+    private var latitude: Double? = null
+    private var longitude: Double? = null
+    private var sortProperty: String? = null
+    private var sortOrder: String? = null
+    private var offset: String? = null
+    private var limit: String? = null
+    private var category: String? = null
+    private var markerHandler = Handler()
+    private var updateTimeRunnable: Runnable = object : Runnable {
+        override fun run() {
+            if (isCurrentLocation == true) {
+                addListMarker()
+
+            }
+            markerHandler.postDelayed(this, 5000)
+        }
+    }
+    class City {
+
+        companion object {
+            var mCity = "ho-chi-minh"
+        }
+
+    }
+
+    class Sort {
+
+        companion object {
+            var mSort = "rating"
+        }
+
+    }
+
+    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val view = inflater?.inflate(R.layout.fragment_map, container, false)
+//         loadingDialog = MainActivity.instance.showProgressDialog(activity)
+//        loadingDialog!!.show()
+        setHeader()
+        service = ApiUtils.soService
+
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            checkLocationPermission()
+        }
+//        addList()
+        val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+        mapFragment?.getMapAsync(this)
+        markerHandler.post(updateTimeRunnable)
+
+
+//        loadingDialog!!.dismiss()
+        return view
+    }
 
     private fun buildGoogleApiClient() {
         mGoogleApiClient = GoogleApiClient.Builder(activity)
@@ -63,7 +133,8 @@ class MapFragment : Fragment(), OnMapReadyCallback,GoogleApiClient.ConnectionCal
     override fun onStop() {
         super.onStop()
         mGoogleApiClient!!.disconnect()
-}
+    }
+
     override fun onMapReady(googleMap: GoogleMap?) {
         mMap = googleMap
         mMap!!.mapType = GoogleMap.MAP_TYPE_NORMAL
@@ -80,17 +151,8 @@ class MapFragment : Fragment(), OnMapReadyCallback,GoogleApiClient.ConnectionCal
         }
     }
 
-    override fun onConnected(p0: Bundle?) {
+/**/    override fun onConnected(p0: Bundle?) {
         getMyLocation()
-//        mLocationRequest = LocationRequest()
-//        mLocationRequest.interval = 1000
-//        mLocationRequest.fastestInterval = 1000
-//        mLocationRequest.priority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
-//        if (ContextCompat.checkSelfPermission(activity,
-//                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-//            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,
-//                    mLocationRequest, this)
-//        }
     }
 
     override fun onConnectionSuspended(p0: Int) {
@@ -119,13 +181,16 @@ class MapFragment : Fragment(), OnMapReadyCallback,GoogleApiClient.ConnectionCal
         val locations = locationManager.getLastKnownLocation(provider)
         val providerList = locationManager.allProviders
         if (null != locations && null != providerList && providerList.size > 0) {
-            val longitude = locations.longitude
-            val latitude = locations.latitude
+            longitude = locations.longitude
+            latitude = locations.latitude
+
+//            addParams(latitude.toString(), longitude.toString())
+//            addList()
             val geocoder = Geocoder(activity,
                     Locale.getDefault())
             try {
-                val listAddresses = geocoder.getFromLocation(latitude,
-                        longitude, 1)
+                val listAddresses = geocoder.getFromLocation(latitude!!,
+                        longitude!!, 1)
                 if (null != listAddresses && listAddresses.size > 0) {
                     val state = listAddresses[0].adminArea
                     val country = listAddresses[0].countryName
@@ -143,6 +208,9 @@ class MapFragment : Fragment(), OnMapReadyCallback,GoogleApiClient.ConnectionCal
         //move map camera
         mMap!!.moveCamera(CameraUpdateFactory.newLatLng(latLng))
         mMap!!.animateCamera(CameraUpdateFactory.zoomTo(11f))
+        longitude = location.longitude
+        latitude = location.latitude
+        isCurrentLocation = true
         //this code stops location updates
         if (mGoogleApiClient != null) {
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient,
@@ -197,16 +265,13 @@ class MapFragment : Fragment(), OnMapReadyCallback,GoogleApiClient.ConnectionCal
 
                             LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE -> {
                             }
-                        }// Location settings are not satisfied.
-                        // However, we have no way
-                        // to fix the
-                        // settings so we won't show the dialog.
-                        // finish();
+                        }
                     }
                 }
             }
         }
     }
+
     private fun checkLocationPermission() {
         if (ContextCompat.checkSelfPermission(activity,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -269,53 +334,66 @@ class MapFragment : Fragment(), OnMapReadyCallback,GoogleApiClient.ConnectionCal
     companion object {
         val MY_PERMISSIONS_REQUEST_LOCATION = 99
     }
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater?.inflate(R.layout.fragment_map, container, false)
-        setHeader()
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            checkLocationPermission()
-        }
-        val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
-        mapFragment?.getMapAsync(this)
-           /* if (mSupportMapFragment == null) {
-                val fragmentManager = fragmentManager
-                val fragmentTransaction = fragmentManager.beginTransaction()
-                mSupportMapFragment = SupportMapFragment.newInstance()
-                fragmentTransaction.replace(R.id.map_where, mSupportMapFragment).commit()
-            }*/
 
-            if (mapFragment != null) {
-                mapFragment!!.getMapAsync { googleMap ->
-                    if (googleMap != null) {
+    fun addParams() {
+        city = City.mCity
+        district = ""
+        tags = ""
+        sortProperty = "rating"
+        sortOrder = "ASC"
+        offset = "0"
+        limit = "10"
+        category = "android"
 
-                        googleMap.uiSettings.setAllGesturesEnabled(true)
+    }
 
-                        // create marker
-                        val marker = MarkerOptions().position(
-                                LatLng(10.7975349, 106.6468148)).title("tphcm")
-                                .snippet("here is my location")
-
-                        googleMap.addMarker(marker)
-
-                       /* val cameraPosition = CameraPosition.Builder().target(LatLng(10.7975349, 106.6468148)).zoom(15.0f).build()
-                        val cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition)
-                        googleMap.moveCamera(cameraUpdate)*/
-
-                    }
-                }
+    fun addListMarker() {
+        addParams()
+        service?.getPlace(city!!,
+                district!!,
+                tags!!, latitude.toString()!!,
+                longitude.toString()!!,
+                sortProperty!!,
+                sortOrder!!,
+                offset!!,
+                limit!!,
+                category!!)?.enqueue(object : Callback<List<Place>> {
+            override fun onFailure(call: Call<List<Place>>?, t: Throwable?) {
+                Log.d("error", t.toString())
             }
 
-            return view
-        }
+            override fun onResponse(call: Call<List<Place>>?, response: Response<List<Place>>?) {
+                if (response!!.isSuccessful) {
+                    for (i in 0..(response.body()!!.size - 1)) {
+                        var lat = response.body()!![i].address?.latitude!!.toDouble()
+                        var long = response.body()!![i].address?.longitude!!.toDouble()
+                        var title = response.body()!![i].name
+                        var snippet = response.body()!![i].address?.street
+                        var marker = MarkerOptions().position(
+                                LatLng(lat, long)).title(title)
+                                .snippet(snippet)
+                        listMarker.add(marker)
+                        mCurrLocationMarker = mMap!!.addMarker(marker)
+                    }
+                    markerHandler.removeCallbacks(updateTimeRunnable)
+                }
+//                loadingDialog!!.dismiss()
+            }
 
-    fun setHeader(){
+        })
+    }
+
+
+
+
+    fun setHeader() {
         MainActivity.instance.imgFilter.visibility = View.GONE
         MainActivity.instance.search_layout.visibility = View.GONE
         MainActivity.instance.tv_title.visibility = View.VISIBLE
         MainActivity.instance.chooseBottomView(1)
     }
 
-     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
         when (requestCode) {
             REQUEST_CHECK_SETTINGS_GPS -> when (resultCode) {
                 Activity.RESULT_OK -> getMyLocation()

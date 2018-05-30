@@ -23,7 +23,7 @@ import android.R.string.ok
  * Created by PhamDuy on 3/14/2017.
  */
 
-class WardAdapter(internal var context: Context, internal var items: List<String>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class WardAdapter(internal var context: Context, internal var items: List<String>, internal  var pos:Int) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -37,8 +37,11 @@ class WardAdapter(internal var context: Context, internal var items: List<String
 
         val myHolder = holder as MyHolder
         myHolder.tvCode.text = items[p].toString()
-
-
+        if(p==pos){
+            myHolder.imgChecked.visibility = View.VISIBLE
+        }else{
+            myHolder.imgChecked.visibility = View.GONE
+        }
     }
 
     override fun getItemCount(): Int {
@@ -48,8 +51,8 @@ class WardAdapter(internal var context: Context, internal var items: List<String
 
     class MyHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
         internal var tvCode: TextView = itemView.findViewById<View>(R.id.tvCode) as TextView
-        private var rldetail: RelativeLayout
-        private var imgChecked: ImageView
+         var rldetail: RelativeLayout
+        var imgChecked: ImageView
 
         init {
             rldetail = itemView.findViewById<View>(R.id.rldetail) as RelativeLayout

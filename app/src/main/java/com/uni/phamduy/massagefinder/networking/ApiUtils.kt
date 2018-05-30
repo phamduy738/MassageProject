@@ -7,7 +7,7 @@ package com.uni.phamduy.coinmarket.networking
 object ApiUtils {
 
 
-    val BASE_URL = "http://192.168.1.2:8080/.rest/api/v1/"
+    val BASE_URL = "http://192.168.1.4:8080/.rest/api/v1/"
     val soService: SOService
         get() = RetrofitClient.getClient(BASE_URL)!!.create(SOService::class.java)
 }

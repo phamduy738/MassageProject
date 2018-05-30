@@ -7,7 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.uni.phamduy.massagefinder.R
+import com.uni.phamduy.massagefinder.module.place.Place
 import java.util.*
 
 
@@ -27,27 +29,13 @@ class ListImageAdapter(var context: Context, private var list: List<String>) : R
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val myHolder = holder as MyHolder
 //        myHolder.tvStoreName.text = list[position]
-        Glide.with(context).load(getRandomCheeseDrawable()).into(myHolder.img)
+        Glide.with(context).load(list[position])
+                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                .placeholder(R.drawable.placeholder)
+                .into(myHolder.img)
 
     }
-    fun getRandomCheeseDrawable(): Int {
-        when (RANDOM.nextInt(5)) {
-            0 -> return R.drawable.q1
-            1 -> return R.drawable.q2
-            2 -> return R.drawable.q3
-            3 -> return R.drawable.q4
-            4 -> return R.drawable.q5
-            5 -> return R.drawable.q6
-            6 -> return R.drawable.q1
-            7 -> return R.drawable.q2
-            8 -> return R.drawable.q3
-            9 -> return R.drawable.q4
-            10 -> return R.drawable.q5
-            11 -> return R.drawable.q6
-            12 -> return R.drawable.q7
-        }
-        return 0
-    }
+
     override fun getItemCount(): Int {
         return list.size
     }

@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">MassageFinder</string>
-    <string name="find_around">Tìm Quanh Đây</string>
+    <string name="find_around">Tìm Quanh Đây</string>
+    <string name="pick_place">Chọn một địa điểm bên dưới</string>
     <string name="title_home">Bản đồ</string>
     <string name="title_dashboard">Danh sách cơ sở</string>
     <string name="title_notifications">Nhân viên</string>
@@ -57,4 +58,5 @@
     <string name="review">Beauty Hân Spa được thiết kế gần gũi, ấm cúng với tông màu vàng chủ đạo và ngập tràn màu xanh cây cối. Không gian tiền sảnh sang trọng, được bày trí bộ salon êm ái để tiếp khách, cùng với đó là các kệ trưng bày mỹ phẩm sạch sẽ, xinh xắn, tạo thiện cảm cho khách hàng ngay khi bước chân vào.</string>
     <string name="close">Đóng</string>
     <string name="gotobase">Tới cơ sở</string>
+    <string name="button_place">cơ sở</string>
 </resources>

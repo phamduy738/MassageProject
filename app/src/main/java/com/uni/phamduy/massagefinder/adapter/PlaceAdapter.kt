@@ -29,13 +29,15 @@ class PlaceAdapter(var context: Context, private var list: List<Place>) : Recycl
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val myHolder = holder as MyHolder
-        myHolder.tvStoreName.text = list[position].name
-        myHolder.tvAddress.text= list[position].address.street
-        myHolder.tvReview.text = Html.fromHtml(list[position].review)
-        myHolder.tvDistance.text = list[position].distance
-        myHolder.ratingBar.rating = (list[position].rating/2).toFloat()
-        myHolder.ratingBar.isClickable = false
-        Glide.with(context).load(list[position].coverImage.link).into(myHolder.thumbnail)
+        myHolder.tvStoreName?.text = list[position].name
+        myHolder.tvAddress?.text= list[position].address?.street
+        myHolder.tvReview?.text = Html.fromHtml(list[position].review)
+        myHolder.tvDistance?.text = list[position].distance
+        myHolder.ratingBar?.rating = (list[position].rating!! /2).toFloat()
+        myHolder.ratingBar?.isClickable = false
+//        myHolder.ratingBar.isIndicator = true
+        myHolder.ratingBar?.isActivated = false
+        Glide.with(context).load(list[position].coverImage?.link).into(myHolder.thumbnail)
 
     }
 
@@ -48,13 +50,14 @@ class PlaceAdapter(var context: Context, private var list: List<Place>) : Recycl
             clickListener?.OnItemClick(adapterPosition, v)
         }
 
-        var tvStoreName: TextView
-         var cardView: CardView
-        var thumbnail: ImageView
-        var tvAddress: TextView
-        var tvReview: TextView
-        var tvDistance: TextView
-        var ratingBar: RatingBar
+        var tvStoreName: TextView?= null
+         var cardView: CardView?= null
+        var thumbnail: ImageView?= null
+        var tvAddress: TextView?= null
+        var tvReview: TextView?= null
+        var tvDistance: TextView?= null
+        var ratingBar: RatingBar?= null
+
 
         init {
             thumbnail= itemView.findViewById(R.id.thumbnail_place)

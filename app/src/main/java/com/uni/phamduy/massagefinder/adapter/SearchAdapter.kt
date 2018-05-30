@@ -28,17 +28,11 @@ class SearchAdapter(private var context: Context, private var list: List<String>
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val myHolder = holder as MyHolder
         myHolder.tvCategory.text = list[position]
-        if (list[position].equals("Quận", ignoreCase = true)) {
+        if (position==1) {
             Glide.with(context).load(R.drawable.ic_ward).into(myHolder.imgCategory)
         }
-     /*   if (list[position].equals("Rating", ignoreCase = true)) {
-            Glide.with(context).load(R.drawable.ic_star).into(myHolder.imgCategory)
-        }
-        if (list[position].equals("Khoảng cách", ignoreCase = true)) {
-            Glide.with(context).load(R.drawable.ic_directions_walk).into(myHolder.imgCategory)
-        }*/
-        if (list[position].equals("Sort", ignoreCase = true)) {
-            Glide.with(context).load(R.drawable.ic_sort).into(myHolder.imgCategory)
+        if (position==2) {
+            Glide.with(context).load(R.drawable.ic_swap_vert).into(myHolder.imgCategory)
         }
 
     }

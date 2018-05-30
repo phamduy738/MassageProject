@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.uni.phamduy.massagefinder.ui
+package com.uni.phamduy.massagefinder.ui.Place
 
 import android.Manifest
 import android.app.Activity
@@ -24,6 +24,7 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.location.Location
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
@@ -33,6 +34,7 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.Toolbar
 import android.text.Editable
 import android.text.Html
+import android.util.Log
 import android.view.*
 import android.widget.Toast
 import com.bumptech.glide.Glide
@@ -50,11 +52,18 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.uni.phamduy.coinmarket.networking.ApiUtils
+import com.uni.phamduy.coinmarket.networking.SOService
 import com.uni.phamduy.massagefinder.R
 import com.uni.phamduy.massagefinder.adapter.ListImageAdapter
+import com.uni.phamduy.massagefinder.module.place.CoverImage
+import com.uni.phamduy.massagefinder.module.place.Place
 import kotlinx.android.synthetic.main.activity_detail.*
 import kotlinx.android.synthetic.main.dialog_describe.*
 import org.xml.sax.XMLReader
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.util.*
 
 
@@ -69,6 +78,8 @@ class PlaceDetailActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiCl
     lateinit var mLocationRequest: LocationRequest
     private var mMap: GoogleMap? = null
     var mapFragment: SupportMapFragment? = null
+    var titleDialog: String? = null
+    var  textDialog: String? = null
 
     fun buildGoogleApiClient() {
         mGoogleApiClient = GoogleApiClient.Builder(this)
@@ -172,14 +183,90 @@ class PlaceDetailActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiCl
         val MY_PERMISSIONS_REQUEST_LOCATION = 99
     }
 
+    lateinit var placeId:String
+    lateinit var coverImage:CoverImage
+    private var service: SOService? = null
+
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detail)
         var toolbar:Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-        collapsing_toolbar.title = "Massage Trường Đua"
+        service = ApiUtils.soService
         loadBackdrop()
+//        loadMap()
+
+        placeId = intent.getStringExtra("placeId")
+        initData()
+        imgCall.setOnClickListener {
+            val intent = Intent(Intent.ACTION_DIAL)
+            intent.data = Uri.parse("tel:0123456789")
+            startActivity(intent)
+        }
+        rlListStaff.setOnClickListener(this)
+        tvDescribeDetail.setOnClickListener(this)
+
+        list.clear()
+//        addList()
+        listImageAdapter = ListImageAdapter(this, list)
+        val linearLayoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        val dividerDrawable = ContextCompat.getDrawable(this, R.drawable.simple_drawable)
+        rvListImage.addItemDecoration(DividerItemDecoration(dividerDrawable))
+        rvListImage.adapter = listImageAdapter
+        rvListImage.layoutManager = linearLayoutManager
+
+
+    }
+    fun initData(){
+        service!!.getPlaceDetail(placeId, "android").enqueue(object : Callback<Place> {
+            override fun onFailure(call: Call<Place>?, t: Throwable?) {
+               Log.e("fail", t.toString())
+            }
+
+            override fun onResponse(call: Call<Place>?, response: Response<Place>?) {
+                if (response!!.isSuccessful){
+//                    collapsing_toolbar.title =  response.body()?.name
+                    tvTitlePlace.text = response.body()?.name
+                    tvAddress.text = response.body()?.address?.street
+                    if(response.body()?.tickets?.size!! >0){
+                        tvPrice.text = response.body()?.tickets?.get(0)?.price?.toString()
+                    }else{
+                        tvPrice.text = "0"
+                    }
+
+                    if (response.body()?.hotLines?.size!!>0){
+                        tvPhone.text = response.body()?.hotLines?.get(0)
+                    }else{
+                        tvPhone.text ="Đang cập nhật"
+                    }
+                    if(response.body()?.rating!=null) {
+                        tvRating.text =response.body()?.rating.toString() + "/10"
+                    }else{
+                        tvRating.text = ""
+                    }
+                    tvDescription.text = Html.fromHtml( response.body()?.review, null, UlTagHandler())
+                    Glide.with(this@PlaceDetailActivity)
+                            .load(response.body()?.coverImage?.link)
+                            .placeholder(R.drawable.placeholder)
+                            .into(backdrop)
+                    var lat = response.body()?.address!!.latitude!!.toDouble()
+                    var long = response.body()?.address!!.longitude!!.toDouble()
+                    loadMap(lat, long, response.body()?.name!!, response.body()?.address?.street!!)
+
+                    for (i in 0 until response.body()?.slideImages!!.size) {
+                        list.add(response.body()?.slideImages!![i].link!!)
+                    }
+                    listImageAdapter.notifyDataSetChanged()
+                    titleDialog = response.body()?.name
+                    textDialog = response.body()?.review
+                }
+            }
+
+        })
+
+    }
+    private fun loadMap( lat:Double,  long:Double, name:String, address: String){
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkLocationPermission()
         }
@@ -191,46 +278,28 @@ class PlaceDetailActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiCl
 
                     googleMap.uiSettings.setAllGesturesEnabled(true)
 
+
                     // create marker
                     val marker = MarkerOptions().position(
-                            LatLng(10.7975349, 106.6468148)).title("tphcm")
-                            .snippet("here is my location")
+                            LatLng(lat, long)).title(name)
+                            .snippet(address)
 
                     googleMap.addMarker(marker)
 
-                    val cameraPosition = CameraPosition.Builder().target(LatLng(10.7975349, 106.6468148)).zoom(15.0f).build()
+                    val cameraPosition = CameraPosition.Builder().target(LatLng(lat, long)).zoom(15.0f).build()
                     val cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition)
                     googleMap.moveCamera(cameraUpdate)
 
                 }
             }
         }
-
-        tv_list_employee.setOnClickListener(this)
-        tvDescribeDetail.setOnClickListener(this)
-
-        list.clear()
-        addList()
-        listImageAdapter = ListImageAdapter(this, list)
-        val linearLayoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        val dividerDrawable = ContextCompat.getDrawable(this, R.drawable.simple_drawable)
-        rvListImage.addItemDecoration(DividerItemDecoration(dividerDrawable))
-        rvListImage.adapter = listImageAdapter
-        rvListImage.layoutManager = linearLayoutManager
-
-
     }
-
     private fun loadBackdrop() {
-        Glide.with(this).load(R.drawable.image_massge).centerCrop().into(backdrop)
+//        Glide.with(this).load(R.drawable.image_massge).centerCrop().into(backdrop)
 
     }
 
-    fun addList() {
-        for (i in 0..10) {
-            list.add(i.toString())
-        }
-    }
+
 
     override fun onClick(v: View?) {
         when (v!!.id) {
@@ -243,21 +312,23 @@ class PlaceDetailActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiCl
                 val window: Window = menuDialog.window
                 window.setGravity(Gravity.TOP)
                 menuDialog.setContentView(R.layout.dialog_describe)
+//                menuDialog.actionBar.subtitle= titleDialog
 
                 menuDialog.window.attributes.windowAnimations = R.style.DialogAnimation
                 menuDialog.window.setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT)
                 menuDialog.window.setBackgroundDrawable(ColorDrawable(Color.WHITE))
+                menuDialog.tvTitle.text = titleDialog
                 menuDialog.setCancelable(true)
 
                 menuDialog.tvClose.setOnClickListener {
                     menuDialog.dismiss()
                 }
-                menuDialog.tvDescribe.text = Html.fromHtml("<ul>\r\n\t<li style=\"text-align:justify\">Tọa lạc tại một con hẻm 606/71 Đường 3 Th&aacute;ng 2, Phường 14, Quận 10, <strong>Hana Chicken</strong> l&agrave; điểm hẹn ăn uống l&yacute; tưởng d&agrave;nh cho mọi người, đến đ&acirc;y bạn được kh&aacute;m ph&aacute;, thưởng thức những m&oacute;n ăn được chế biến c&ocirc;ng phu, cầu kỳ, vị thơm ngon, tinh tế.</li>\r\n\t<li style=\"text-align:justify\"><strong>Hana Chicken</strong> sở hữu thực đơn ăn uống đa dạng, phong ph&uacute;, đ&aacute;p ứng cho nhu cầu, sở th&iacute;ch của từng người: G&agrave; ph&ocirc; mai, tokpokki, soup kim chi v&agrave; nhiều m&oacute;n ăn k&egrave;m: Cơm rong biển, khoai đ&uacute;t l&ograve;, khoai t&acirc;y chi&ecirc;n, salad&hellip;</li>\r\n\t<li style=\"text-align:justify\">G&agrave; r&aacute;n 4 loại sốt l&agrave; một trong những m&oacute;n ăn hiện &ldquo;l&agrave;m mưa l&agrave;m gi&oacute;&rdquo; tại qu&aacute;n, được nhiều người ưa th&iacute;ch. G&agrave; được tẩm gia vị đầy đủ rồi chi&ecirc;n với lớp bột cũng được tẩm vị đậm đ&agrave;, g&agrave; r&aacute;n với độ vừa phải, vỏ gi&ograve;n, thịt kh&ocirc;ng bở m&agrave; mềm ăn k&egrave;m với 4 loại sốt như ti&ecirc;u đen, ph&ocirc; mai, bơ tỏi, mật ong, chanh d&acirc;y.</li>\r\n\t<li style=\"text-align:justify\">Tất cả những m&oacute;n ăn tại <strong>Hana Chicken</strong> đều được l&agrave;m từ nguy&ecirc;n liệu sạch, đảm bảo vệ sinh an to&agrave;n thực phẩm v&agrave; được đầu bếp tay nghề cao, d&agrave;y dạn kinh nghiệm chế biến.</li>\r\n\t<li style=\"text-align:justify\"><strong>Hana Chicken</strong> với kh&ocirc;ng gian kh&ocirc;ng cầu kỳ, sang trọng nhưng mọi thứ đều được thiết kế, b&agrave;y tr&iacute; một c&aacute;ch h&agrave;i h&ograve;a v&agrave; đội ngũ nh&acirc;n vi&ecirc;n phục vụ chuy&ecirc;n nghiệp, chu đ&aacute;o, th&acirc;n thiện, sẽ mang đến cho bạn những ph&uacute;t gi&acirc;y ăn uống thỏa m&atilde;n nhất.</li>\r\n</ul>", null,  UlTagHandler())
+                menuDialog.tvDescribe.text = Html.fromHtml(textDialog, null, UlTagHandler())
                 menuDialog.show()
             }
-            R.id.tv_list_employee -> {
+            R.id.rlListStaff -> {
                 val intent = Intent()
-                intent.putExtra("result", "www")
+                intent.putExtra("placeId", placeId)
                 setResult(Activity.RESULT_OK,intent)
                 finish()
             }

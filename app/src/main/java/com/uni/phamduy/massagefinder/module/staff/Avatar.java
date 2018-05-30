@@ -1,10 +1,10 @@
 
-package com.uni.phamduy.massagefinder.module.place;
+package com.uni.phamduy.massagefinder.module.staff;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class SlideImage {
+public class Avatar {
 
     @SerializedName("id")
     @Expose

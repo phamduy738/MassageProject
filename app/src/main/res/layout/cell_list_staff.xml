@@ -15,10 +15,11 @@
 
         <ImageView
             android:id="@+id/avatar"
-            android:layout_width="120dp"
+            android:layout_width="80dp"
             android:layout_height="120dp"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="5dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
             app:srcCompat="@drawable/hinh1" />
 
         <RelativeLayout
@@ -29,37 +30,56 @@
             android:layout_toRightOf="@id/avatar">
 
             <TextView
-                android:id="@+id/textView8"
+                android:id="@+id/tvNumber"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
                 android:layout_alignParentTop="true"
-                android:padding="2dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp"
+                android:paddingTop="2dp"
+                android:textSize="14sp"
+                android:textStyle="bold"
                 android:text="3 -"
                 android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
 
             <TextView
-                android:id="@+id/textView10"
+                android:id="@+id/tvName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
-                android:layout_toEndOf="@+id/textView8"
-                android:padding="2dp"
+                android:layout_toEndOf="@+id/tvNumber"
+                android:textSize="14sp"
                 android:text="Nguyễn Thị Nga"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp"
+                android:paddingTop="2dp"
+                android:textStyle="bold"
                 android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
 
             <TextView
-                android:id="@+id/textView11"
+                android:id="@+id/tvHomeTown"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignStart="@+id/textView8"
-                android:layout_below="@+id/textView8"
-                android:padding="2dp"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/tvDate"
+                android:paddingLeft="2dp"
+                android:paddingRight="2dp"
                 android:text="Quê: Long An"
-                android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
+                android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+                android:textStyle="italic" />
+            <RelativeLayout
+                android:id="@+id/hori1"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_below="@id/tvHomeTown"
+                android:background="@color/light_gray"
+                android:layout_marginTop="5dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"/>
 
             <TextView
-                android:id="@+id/textView13"
+                android:id="@+id/tvRating"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignTop="@+id/imageView8"
@@ -81,11 +101,11 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_marginLeft="10dp"
-                android:layout_toEndOf="@+id/textView13"
+                android:layout_toEndOf="@+id/tvRating"
                 app:srcCompat="@drawable/ic_visibility" />
 
             <TextView
-                android:id="@+id/textView14"
+                android:id="@+id/tvNumberReview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignTop="@+id/imageView9"
@@ -94,19 +114,20 @@
                 android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
 
             <TextView
-                android:id="@+id/tvplace"
+                android:id="@+id/tvCheckPlace"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentEnd="true"
+                android:background="@drawable/custom_textview_place"
+                android:padding="1dp"
                 android:text="Cơ sở"
-                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                android:textColor="@color/colorPrimary"
-                android:textSize="18sp"
+                android:textColor="@color/white"
+                android:textSize="14sp"
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/textView16"
+                android:id="@+id/tvDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
@@ -115,22 +136,30 @@
                 android:text="30/10/2017"
                 android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
 
-        </RelativeLayout>
+            <TextView
+                android:id="@+id/tvFirstReview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/hori1"
+                android:layout_marginBottom="25dp"
+                android:ellipsize="end"
+                android:maxLines="3"
+                android:padding="3dp"
+                android:text="@string/review"
+                android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
 
-        <TextView
-            android:id="@+id/textView12"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/relativeLayout"
-            android:layout_alignEnd="@+id/relativeLayout"
-            android:layout_alignStart="@+id/relativeLayout"
-            android:layout_marginBottom="23dp"
-            android:background="@drawable/custom_edittext"
-            android:ellipsize="end"
-            android:maxLines="3"
-            android:padding="3dp"
-            android:text="@string/review"
-            android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
+            <RelativeLayout
+                android:id="@+id/hori2"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_alignParentStart="true"
+                android:layout_above="@+id/tvRating"
+                android:layout_marginBottom="3dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:background="@color/light_gray" />
+
+        </RelativeLayout>
 
     </RelativeLayout>
 </android.support.v7.widget.CardView>

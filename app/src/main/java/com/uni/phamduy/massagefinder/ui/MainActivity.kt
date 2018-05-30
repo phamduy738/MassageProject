@@ -2,6 +2,8 @@ package com.uni.phamduy.massagefinder
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.ProgressDialog
+import android.content.Context
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
 import android.support.design.widget.BottomNavigationView
@@ -16,11 +18,13 @@ import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.RelativeLayout
 import android.widget.TextView
 import com.dgreenhalgh.android.simpleitemdecoration.grid.GridDividerItemDecoration
 import com.uni.phamduy.massagefinder.ui.Map.MapFragment
 import com.uni.phamduy.massagefinder.ui.Place.WardFragment
 import com.uni.phamduy.massagefinder.ui.Staff.StaffFragment
+import com.uni.phamduy.massagefinder.utils.Common
 import kotlinx.android.synthetic.main.main_activity.*
 
 
@@ -29,7 +33,8 @@ import kotlinx.android.synthetic.main.main_activity.*
  */
 class MainActivity : AppCompatActivity() {
     lateinit var tv_title: TextView
-    lateinit var rvSearch: RecyclerView
+    lateinit var rlFilterCity:RelativeLayout
+    lateinit var rlSort:RelativeLayout
     lateinit var ed_search: EditText
     lateinit var search_layout: ConstraintLayout
     lateinit var imgFilter: ImageView
@@ -65,15 +70,13 @@ class MainActivity : AppCompatActivity() {
     fun init() {
         instance = this
         tv_title = findViewById(R.id.tv_title)
-        rvSearch = findViewById(R.id.rvSearch)
+        rlFilterCity = findViewById(R.id.rlFilterCity)
+        rlSort = findViewById(R.id.rlSort)
         ed_search = findViewById(R.id.ed_search)
         search_layout = findViewById(R.id.search_layout)
         imgFilter = findViewById(R.id.imgFilter)
         toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
-        val horizontalDivider = ContextCompat.getDrawable(this, R.drawable.divider)
-        val verticalDivider = ContextCompat.getDrawable(this, R.drawable.divider)
-        MainActivity.instance.rvSearch.addItemDecoration(GridDividerItemDecoration(horizontalDivider, verticalDivider, 2))
     }
 
 
@@ -133,10 +136,23 @@ class MainActivity : AppCompatActivity() {
 
         //If a layout container, iterate over children and seed recursion.
         if (view is ViewGroup) {
-            for (i in 0..(view as ViewGroup).childCount - 1) {
-                val innerView = (view as ViewGroup).getChildAt(i)
+            for (i in 0..(view ).childCount - 1) {
+                val innerView = (view).getChildAt(i)
                 setupUI(innerView)
             }
         }
     }
+    fun showProgressDialog(context: Context): ProgressDialog {
+        val pDialog = ProgressDialog(context)
+        pDialog.setMessage("Please wait...")
+        pDialog.setCancelable(false)
+        pDialog.show()
+        return pDialog
+    }
+
+    fun hideProgressDialog(pDialog: ProgressDialog) {
+        if (pDialog.isShowing())
+            pDialog.dismiss()
+    }
+
 }
